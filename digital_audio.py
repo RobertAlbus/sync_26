@@ -1,16 +1,13 @@
-# /// script
-# requires-python = ">=3.11"
-# dependencies = ["manim>=0.21"]
-# ///
-
-import os
-
 import numpy as np
 from manim import *
+from manim_slides import Slide
 
 
-class DigitalAudio(Scene):
+class DigitalAudio(Slide):
     def construct(self):
+        self.skip_reversing = True
+        self.wait_time_between_slides = 0.1
+
         freq = 1.0
         t_end = 2.0
         n_samples = 16
@@ -46,10 +43,12 @@ class DigitalAudio(Scene):
         y_labels = [
             n for n in axes.y_axis.numbers if abs(abs(n.get_value()) - 1.0) < 1e-6
         ]
+        self.next_slide()
+
         for _ in range(5):
             self.play(*[n.animate.scale(1.5) for n in y_labels], run_time=0.5)
             self.play(*[n.animate.scale(1 / 1.5) for n in y_labels], run_time=0.5)
-        self.wait(3.0)
+        self.next_slide()
 
         ts = np.linspace(0.0, t_end, n_samples)
         values = amplitude * np.sin(2 * np.pi * freq * ts)
@@ -79,6 +78,7 @@ class DigitalAudio(Scene):
             ]
         )
         self.play(FadeIn(sample_labels))
+        self.next_slide()
 
         stems = VGroup(
             *[
@@ -100,8 +100,8 @@ class DigitalAudio(Scene):
             run_time=1.5,
         )
         self.play(LaggedStart(*[FadeIn(d, scale=0.4) for d in dots], lag_ratio=0.08), run_time=1.0)
-        self.wait(0.3)
         self.play(FadeOut(wave), FadeOut(stems), run_time=1.0)
+        self.next_slide()
 
         x_left = axes.c2p(0, 0)[0]
         x_right = axes.c2p(t_end, 0)[0]
@@ -145,18 +145,9 @@ class DigitalAudio(Scene):
             FadeIn(travelling_group, scale=0.5),
             run_time=0.5,
         )
-        self.wait(6.0)
+        self.next_slide()
 
         self.play(LaggedStart(*[Create(c) for c in cells], lag_ratio=0.06), run_time=1.2)
         self.add(array_label)
 
         self.play(Transform(travelling_group, landed_group), run_time=1.0)
-
-        self.wait(5.0)
-
-
-if __name__ == "__main__":
-    quality = os.environ.get("MANIM_QUALITY", "low_quality")
-    preview = os.environ.get("MANIM_PREVIEW", "0") == "1"
-    with tempconfig({"quality": quality, "preview": preview}):
-        DigitalAudio().render()

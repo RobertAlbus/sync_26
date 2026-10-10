@@ -1,0 +1,15 @@
+[project]
+name = "digital-audio"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["manim>=0.21,<0.22", "manim-slides[pyside6]>=5.7"]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = ["poethepoet>=0.48"]
+
+[tool.poe.tasks]
+render = "manim-slides render -ql digital_audio.py DigitalAudio"
+present = "manim-slides present DigitalAudio"
