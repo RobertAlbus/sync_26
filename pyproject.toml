@@ -11,6 +11,8 @@ package = false
 dev = ["poethepoet>=0.48"]
 
 [tool.poe.tasks]
-render = "manim-slides render -ql digital_audio.py DigitalAudio Chapter2"
+render = "manim-slides render -- -ql digital_audio.py DigitalAudio Chapter2"
+render-hq = "manim-slides render -- -qh digital_audio.py DigitalAudio Chapter2"
 present = "manim-slides present DigitalAudio Chapter2"
 html = "manim-slides convert DigitalAudio Chapter2 presentation.html --one-file"
+flush = "rm -rf media slides presentation.html presentation_assets"
