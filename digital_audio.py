@@ -61,7 +61,7 @@ class DigitalAudio(Slide):
                     start=[axes.c2p(t, 0)[0], axes.c2p(0, -1.25)[1], 0],
                     end=[axes.c2p(t, 0)[0], axes.c2p(0, 1.25)[1], 0],
                     color=BLUE_E,
-                    stroke_width=1,
+                    stroke_width=2,
                     dash_length=0.06,
                 )
                 for t in ts
@@ -78,7 +78,6 @@ class DigitalAudio(Slide):
             ]
         )
         self.play(FadeIn(sample_labels))
-        self.next_slide()
 
         stems = VGroup(
             *[
@@ -140,11 +139,7 @@ class DigitalAudio(Slide):
             travelling_group.add(travelling)
             landed_group.add(landed)
 
-        self.play(
-            *[dot.animate.set_color(RED) for dot in dots],
-            FadeIn(travelling_group, scale=0.5),
-            run_time=0.5,
-        )
+        self.play(FadeIn(travelling_group, scale=0.5), run_time=0.5)
         self.next_slide()
 
         self.play(LaggedStart(*[Create(c) for c in cells], lag_ratio=0.06), run_time=1.2)
