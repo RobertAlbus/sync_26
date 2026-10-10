@@ -10,9 +10,25 @@ package = false
 [dependency-groups]
 dev = ["poethepoet>=0.48"]
 
-[tool.poe.tasks]
-render = "manim-slides render -- -ql digital_audio.py DigitalAudio Chapter2"
-render-hq = "manim-slides render -- -qh digital_audio.py DigitalAudio Chapter2"
-present = "manim-slides present DigitalAudio Chapter2"
-html = "manim-slides convert DigitalAudio Chapter2 presentation.html --one-file"
-flush = "rm -rf media slides presentation.html presentation_assets"
+[tool.poe.tasks.render]
+cmd = "manim-slides render -- -ql 00_main.py ${_scenes}"
+uses = { _scenes = "_scene-names" }
+
+[tool.poe.tasks.render-hq]
+cmd = "manim-slides render -- -qh 00_main.py ${_scenes}"
+uses = { _scenes = "_scene-names" }
+
+[tool.poe.tasks.present]
+cmd = "manim-slides present ${_scenes}"
+uses = { _scenes = "_scene-names" }
+
+[tool.poe.tasks.html]
+cmd = "manim-slides convert ${_scenes} presentation.html --one-file"
+uses = { _scenes = "_scene-names" }
+
+[tool.poe.tasks.flush]
+cmd = "rm -rf media slides presentation.html presentation_assets"
+
+[tool.poe.tasks._scene-names]
+script = "_scenes:scene_names"
+print_result = true
