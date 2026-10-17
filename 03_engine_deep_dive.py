@@ -3,6 +3,28 @@ from manim import *
 from manim_slides import Slide
 
 
+def make_speaker(scale=1.0):
+    square = Rectangle(
+        width=0.8,
+        height=0.8,
+        stroke_color=WHITE,
+        stroke_width=4,
+        fill_color=WHITE,
+        fill_opacity=0.1,
+    )
+    cone = Polygon(
+        [0.4, 0.25, 0],
+        [0.4, -0.25, 0],
+        [1.2, -0.75, 0],
+        [1.2, 0.75, 0],
+        stroke_color=WHITE,
+        stroke_width=4,
+        fill_color=WHITE,
+        fill_opacity=0.1,
+    )
+    return VGroup(square, cone).scale(scale)
+
+
 class EngineDeepDive(Slide):
     def construct(self):
         self.add(Text("Engine Technical Deep Dive", font_size=44))
@@ -15,9 +37,10 @@ class DigitalAudio(Slide):
         self.skip_reversing = True
         self.wait_time_between_slides = 0.1
 
-        freq = 1.0
         t_end = 2.0
         n_samples = 16
+        wave_period_samples = 7.5
+        freq = n_samples / (wave_period_samples * t_end)
         amplitude = 1.0
 
         title = Text("Digital Audio: From a Continuous Wave to Samples", font_size=30)
@@ -44,18 +67,30 @@ class DigitalAudio(Slide):
             color=BLUE,
         )
 
-        self.add(title)
-        self.play(Create(axes))
+        self.add(title, axes)
         self.play(Create(wave), run_time=2)
         y_labels = [
             n for n in axes.y_axis.numbers if abs(abs(n.get_value()) - 1.0) < 1e-6
         ]
         self.next_slide()
 
-        for _ in range(5):
-            self.play(*[n.animate.scale(1.5) for n in y_labels], run_time=0.5)
-            self.play(*[n.animate.scale(1 / 1.5) for n in y_labels], run_time=0.5)
+        box_width = max(label.width for label in y_labels) + 0.2
+        box_height = max(label.height for label in y_labels) + 0.2
+        y_boxes = VGroup(
+            *[
+                Rectangle(
+                    width=box_width,
+                    height=box_height,
+                    color=YELLOW,
+                    stroke_width=4,
+                ).move_to(label.get_center())
+                for label in y_labels
+            ]
+        )
+        self.play(Create(y_boxes))
         self.next_slide()
+
+        self.play(FadeOut(y_boxes), run_time=0.5)
 
         ts = np.linspace(0.0, t_end, n_samples)
         values = amplitude * np.sin(2 * np.pi * freq * ts)
@@ -126,7 +161,7 @@ class DigitalAudio(Slide):
             cell.move_to([axes.c2p(t, 0)[0], array_y, 0])
             cells.add(cell)
 
-        array_label = Text("sample array (32 bit floating point)", font_size=22).next_to(
+        array_label = Text("audio buffer", font_size=22).next_to(
             cells, DOWN, buff=0.35
         )
 
@@ -153,3 +188,39 @@ class DigitalAudio(Slide):
         self.add(array_label)
 
         self.play(Transform(travelling_group, landed_group), run_time=1.0)
+        self.next_slide()
+
+        speaker = make_speaker()
+        speaker.move_to([4.8, -3.2, 0])
+        self.play(FadeIn(speaker, shift=UP * 0.2), run_time=0.5)
+
+        target = speaker[0].get_center()
+        self.play(
+            FadeOut(dots),
+            LaggedStart(
+                *[number.animate.move_to(target) for number in travelling_group],
+                lag_ratio=0.08,
+            ),
+            run_time=2.2,
+        )
+        self.play(FadeOut(travelling_group, scale=0.3), run_time=0.4)
+
+        cone_tip = speaker[1].get_right() + RIGHT * 0.1
+        for _ in range(2):
+            waves = VGroup(
+                *[
+                    Arc(
+                        radius=radius,
+                        start_angle=-60 * DEGREES,
+                        angle=120 * DEGREES,
+                        color=YELLOW,
+                        stroke_width=5,
+                    ).shift(cone_tip)
+                    for radius in (0.25, 0.45, 0.65)
+                ]
+            )
+            self.play(
+                LaggedStart(*[Create(wave) for wave in waves], lag_ratio=0.25),
+                run_time=0.8,
+            )
+            self.play(FadeOut(waves), run_time=0.2)
