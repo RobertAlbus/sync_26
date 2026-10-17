@@ -8,6 +8,7 @@
     * quick overview of presentation
     * goals for this talk
 * 02: my practice
+    * [slide] 
     * [slide] compositional, not live. compare production vs. live performance
     * [demo]: 067_dj_tool
     * [slide] the composition is expressed in code. the live ui is a helpful tool but not the authority.
