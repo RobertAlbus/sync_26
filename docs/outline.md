@@ -1,48 +1,34 @@
 # OUTLINE: Making Electronic Music With Code From First Principles in C++
 
-* 01: intro
+* 01: [slides] intro
     * bio
+        * Rob, music producer and computer programmer
+        * I make music using C++ programming
+        * I am fully self-taught
     * quick overview of presentation
-        * landscape survey: generative art, live coding, etc.
-        * explain my practice
-        * what is an audio engine? (technical deep dive)
-        * 
     * goals for this talk
-* 02: code-music landscape
-    * live coding: strudel, supercollider
-        * slide
-        * couple of video clips
-    * DSP: vst plugings, visual programming, supercollider
-        * slide
-        * couple of video clips
-    * Generative art
-        * Symbolic algorithmic composition, stochastic composition 
-            * video clip of music.py
-        * Vera Molnar and/or other example(s) (a visual example of this kind of approach)
-* 03: my practice
-    * DEFINE MY PRACTICE
-        * not live; compositional. compare production vs. live performance
-        * succinct summary: engine, primitives => instruments, sequencing. all in code. live ui for tweaking patches.
-    * unifying diagram
+* 02: my practice
+    * [slide] compositional, not live. compare production vs. live performance
+    * [demo]: 067_dj_tool
+    * [slide] the composition is expressed in code. the live ui is a helpful tool but not the authority.
+    * [demo+slides] composition 16 bars (needs to be constructed)
+        * 4/4 kick and algebra constructed (1 bar, tile 16 bars, trim_between)
+        * chords (construct 2 bars A and B version, tile)
+        * automation clip for chords (rise from bar 0 to 8, then loop for 8-16)
+        * bassline (light weight stochastic search example, tile, trim)
+* 03: [slides] engine technical deep dive (succinct)
     * engine
         * digital audio primer
-        * digital audio => engine example (repeatedly shovel audio into)
+        * digital audio => engine example (repeatedly shovel audio into buffer)
     * dsp primitives => instruments
         * what "primitives" refers to (oscs, filters, delays, envelopes)
         * simple oscillator explanation (osc.next() + plot)
-        * combining primitives into instruments
-        * diagram of my subtractive synth
-        * live example of my subtractive synth
-        * code example for the patch
+        * combining primitives into instruments (diagram of my subtractive synth)
     * sequencing
-        * define: do this musical task at this time
-        * piano roll screenshot
-        * example from my code
-        * overlay pictoral explanation of pattern algebra
-        * live example of notes in timeline, automation clips
-    * unifying diagram
-* 04: live noise performance system 
-    * fdn diagram
-    * demo
-* 05: practical advice
-* 06: conclusion
+        * controls pitch, on/off, etc. over time
+    * unifying diagram animation
+* 04: [slides] why I like to work this way
+* 05: live noise performance system (optional time permitting)
+    * [slide] fdn diagram
+    * [demo]
+* 06: [slide] conclusion
