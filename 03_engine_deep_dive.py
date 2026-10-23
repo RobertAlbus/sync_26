@@ -87,7 +87,7 @@ class DigitalAudio(Slide):
                 for label in y_labels
             ]
         )
-        self.play(Create(y_boxes))
+        self.play(*[Create(box) for box in y_boxes])
         self.next_slide()
 
         self.play(FadeOut(y_boxes), run_time=0.5)
@@ -224,3 +224,145 @@ class DigitalAudio(Slide):
                 run_time=0.8,
             )
             self.play(FadeOut(waves), run_time=0.2)
+
+        self.next_slide()
+
+        speaker_target = speaker[0].get_center()
+
+        max_segments = 12
+        phase_offsets = []
+        phase = 2 * np.pi * freq * t_end
+        for segment in range(max_segments):
+            phase_offsets.append(phase)
+            period_samples = wave_period_samples + 0.5 * segment
+            segment_freq = n_samples / (period_samples * t_end)
+            phase += 2 * np.pi * segment_freq * t_end
+
+        def segment_values(segment):
+            period_samples = wave_period_samples + 0.5 * segment
+            segment_freq = n_samples / (period_samples * t_end)
+            return amplitude * np.sin(
+                2 * np.pi * segment_freq * ts + phase_offsets[segment]
+            )
+
+        def make_graph_dots(segment):
+            return VGroup(
+                *[
+                    Dot(axes.c2p(t, value), color=YELLOW, radius=0.075)
+                    for t, value in zip(ts, segment_values(segment))
+                ]
+            )
+
+        def make_buffer_numbers(segment):
+            numbers = VGroup(
+                *[
+                    DecimalNumber(
+                        value,
+                        num_decimal_places=2,
+                        font_size=20,
+                        color=YELLOW,
+                    ).move_to(cell)
+                    for value, cell in zip(segment_values(segment), cells)
+                ]
+            )
+            for number in numbers:
+                if number.width > cell_w - 0.12:
+                    number.scale((cell_w - 0.12) / number.width)
+            return numbers
+
+        graph_dots = make_graph_dots(0)
+        self.play(
+            LaggedStart(
+                *[FadeIn(dot, scale=0.4) for dot in graph_dots],
+                lag_ratio=0.03,
+            ),
+            run_time=0.6,
+        )
+
+        next_dots = make_graph_dots(1)
+        current_numbers = make_buffer_numbers(0)
+        self.play(
+            AnimationGroup(
+                LaggedStart(
+                    *[
+                        Transform(dot, number)
+                        for dot, number in zip(graph_dots, current_numbers)
+                    ],
+                    lag_ratio=0.02,
+                    run_time=1.0,
+                ),
+                Succession(
+                    Wait(0.2),
+                    LaggedStart(
+                        *[FadeIn(dot, scale=0.4) for dot in next_dots],
+                        lag_ratio=0.02,
+                        run_time=0.8,
+                    ),
+                ),
+            )
+        )
+        buffer_items = graph_dots
+        graph_dots = next_dots
+
+        speaker_batch = None
+        for cycle in range(10):
+            next_dots = make_graph_dots(cycle + 2)
+            current_numbers = make_buffer_numbers(cycle + 1)
+            graph_to_buffer = LaggedStart(
+                *[
+                    Transform(dot, number)
+                    for dot, number in zip(graph_dots, current_numbers)
+                ],
+                lag_ratio=0.02,
+                run_time=1.0,
+            )
+            buffer_to_speaker = LaggedStart(
+                *[
+                    number.animate.move_to(speaker_target)
+                    for number in buffer_items
+                ],
+                lag_ratio=0.02,
+                run_time=0.8,
+            )
+            graph_redraw = LaggedStart(
+                *[FadeIn(dot, scale=0.4) for dot in next_dots],
+                lag_ratio=0.02,
+                run_time=0.8,
+            )
+            animations = [
+                graph_to_buffer,
+                Succession(
+                    Wait(0.2),
+                    AnimationGroup(buffer_to_speaker, graph_redraw),
+                ),
+            ]
+            if speaker_batch is not None:
+                animations.append(FadeOut(speaker_batch, run_time=0.2))
+            self.play(AnimationGroup(*animations))
+            if speaker_batch is not None:
+                self.remove(speaker_batch)
+            speaker_batch = buffer_items
+            buffer_items = graph_dots
+            graph_dots = next_dots
+
+        if speaker_batch is not None:
+            self.play(FadeOut(speaker_batch), run_time=0.2)
+            self.remove(speaker_batch)
+
+        self.play(
+            LaggedStart(
+                *[
+                    number.animate.move_to(speaker_target)
+                    for number in buffer_items
+                ],
+                lag_ratio=0.02,
+                run_time=0.8,
+            )
+        )
+        self.play(
+            FadeOut(buffer_items),
+            FadeOut(graph_dots),
+            run_time=0.3,
+        )
+        self.remove(dots, travelling_group, buffer_items, graph_dots, next_dots)
+        self.wait(0.3)
