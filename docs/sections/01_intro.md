@@ -14,8 +14,8 @@ Using the C++ programming language to build and audio engine, instruments, and t
 By Rob Albus
 
 ## overview slide
-- Tour of a song: 067_dj_tool
-- demonstrate how I produce music in code
+- Demo a song
+- Demo actually writing music this way
 - technical deep dive: what is an audio engine?
 - live noise performance
 
