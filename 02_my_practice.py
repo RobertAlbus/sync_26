@@ -7,6 +7,7 @@ MUTED = GREY_A
 START_COLOR = ManimColor("#2E7D32")
 DURATION_COLOR = ManimColor("#E65100")
 PITCH_COLOR = ManimColor("#00695C")
+ROLL_BACKGROUND = ManimColor("#A0A0A0")
 
 
 def bullet_rows(items, font_size=30):
@@ -121,6 +122,10 @@ class MyPractice(Slide):
         self.next_slide()
 
         self.clear()
+        self.pattern_morph_slide()
+        self.next_slide()
+
+        self.clear()
         self.tiling_slide()
 
     def compositional_slide(self):
@@ -200,7 +205,7 @@ class MyPractice(Slide):
             Rectangle(
                 width=width,
                 height=height,
-                fill_color=GREY_C,
+                fill_color=ROLL_BACKGROUND,
                 fill_opacity=1,
                 stroke_width=0,
             ).move_to([x_left + width / 2, (y_bottom + y_top) / 2, 0])
@@ -449,6 +454,114 @@ class MyPractice(Slide):
             )
 
         self.play(*animations, run_time=1.5)
+        self.wait()
+
+    def pattern_morph_slide(self):
+        roll_width = 6.4
+        roll_height = 2.2
+        center_x = 0.3
+        roll_left = center_x - roll_width / 2
+        n_beats = 4
+        beat_w = roll_width / n_beats
+        note_width = roll_width / 8
+        note_height = 0.18
+        note_y = 0.3
+
+        roll_bg = Rectangle(
+            width=roll_width,
+            height=roll_height,
+            fill_color=ROLL_BACKGROUND,
+            fill_opacity=1,
+            stroke_color=GREY_B,
+            stroke_width=2,
+        ).move_to([center_x, 0, 0])
+
+        grid = VGroup()
+        for i in range(n_beats * 4 + 1):
+            x = roll_left + i * beat_w / 4
+            grid.add(
+                Line(
+                    [x, -roll_height / 2, 0],
+                    [x, roll_height / 2, 0],
+                    color=GREY_E,
+                    stroke_width=1,
+                )
+            )
+        for beat in range(n_beats + 1):
+            x = roll_left + beat * beat_w
+            is_bar = beat in (0, n_beats)
+            grid.add(
+                Line(
+                    [x, -roll_height / 2, 0],
+                    [x, roll_height / 2, 0],
+                    color=BLACK if is_bar else GREY_D,
+                    stroke_width=3 if is_bar else 2,
+                )
+            )
+        for y in (-1.1, -0.7, -0.3, 0.1, 0.5, 0.9):
+            grid.add(
+                Line(
+                    [roll_left, y, 0],
+                    [roll_left + roll_width, y, 0],
+                    color=GREY_D,
+                    stroke_width=1,
+                )
+            )
+
+        start_notes = VGroup()
+        for beat in range(n_beats):
+            note = Rectangle(
+                width=note_width,
+                height=note_height,
+                fill_color=BLUE_E,
+                fill_opacity=1,
+                stroke_color=BLUE_E,
+                stroke_width=2,
+            )
+            note.move_to(
+                [roll_left + beat * beat_w + note_width / 2, note_y, 0]
+            )
+            start_notes.add(note)
+
+        bar_w = 13.6 / 16
+        clip_width = bar_w * 0.9
+        clip_height = 0.98
+        clip_left = center_x - clip_width / 2
+        clip_note_width = clip_width / 8
+
+        clip_bg = Rectangle(
+            width=clip_width,
+            height=clip_height,
+            fill_color=BLUE_E,
+            fill_opacity=1,
+            stroke_color=BLUE_B,
+            stroke_width=2,
+        ).move_to([center_x, 0, 0])
+
+        target_notes = VGroup()
+        for beat in range(n_beats):
+            note = Rectangle(
+                width=clip_note_width,
+                height=clip_height * 0.35,
+                fill_color=BLUE_B,
+                fill_opacity=1,
+                stroke_width=0,
+            )
+            note.move_to(
+                [clip_left + beat * clip_width / 4 + clip_note_width / 2, 0, 0]
+            )
+            target_notes.add(note)
+
+        self.add(roll_bg, grid, start_notes)
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            Transform(roll_bg, clip_bg),
+            Transform(start_notes, target_notes),
+            FadeOut(grid),
+            run_time=2.0,
+        )
         self.wait()
 
     def tiling_slide(self):
