@@ -1,9 +1,16 @@
 from manim import *
 from manim_slides import Slide
 
+from lib import slide_title
+
 
 class LiveNoisePerformanceSystem(Slide):
     def construct(self):
-        self.add(Text("Live Noise Performance System", font_size=44))
+        self.add(
+            slide_title(
+                "Live Noise Performance System",
+                center=True,
+            )
+        )
         self.wait()
         self.next_slide()

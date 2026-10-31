@@ -1,9 +1,12 @@
 from manim import *
 from manim_slides import Slide
 
+from lib import slide_title
 
-class WhyIWorkThisWay(Slide):
-    def construct(self):
-        self.add(Text("Why I Like to Work This Way", font_size=44))
-        self.wait()
-        self.next_slide()
+
+# class WhyIWorkThisWay(Slide):
+#     def construct(self):
+#         pass
+#         self.add(slide_title("Why I Like to Work This Way", center=True))
+#         self.wait()
+#         self.next_slide()

@@ -1,9 +1,9 @@
 from manim import *
 from manim_slides import Slide
 
+from lib import ACCENT, MUTED, bullet_rows, slide_title
 
-ACCENT = BLUE
-MUTED = GREY_A
+
 START_COLOR = ManimColor("#2E7D32")
 DURATION_COLOR = ManimColor("#E65100")
 PITCH_COLOR = ManimColor("#00695C")
@@ -15,24 +15,6 @@ PIANO_ROLL_Y_TOP = 2.3
 PIANO_ROLL_LOW_MIDI = 60
 PIANO_ROLL_HIGH_MIDI = 84
 PIANO_ROLL_BEATS = 4
-
-
-def bullet_rows(items, font_size=30):
-    rows = VGroup()
-    for item in items:
-        marker = Text("•", font_size=font_size, color=ACCENT)
-        label = Text(item, font_size=font_size)
-        row = VGroup(marker, label).arrange(RIGHT, buff=0.3)
-        marker.set_y(label.get_center()[1])
-        rows.add(row)
-    rows.arrange(DOWN, aligned_edge=LEFT, buff=0.35)
-    return rows
-
-
-def slide_title(text):
-    title = Text(text, font_size=48, weight=BOLD)
-    title.to_edge(UP, buff=0.9)
-    return title
 
 
 def make_table(pos, n_rows=1, headers=("Start", "Duration", "Note")):
@@ -297,9 +279,9 @@ class MyPractice(Slide):
             [
                 "Timeline",
                 "Mixer, routing",
-                "Subtractive, FM, cymbal, FDN",
+                "Subtractive, FM, Cymbal, FDN",
                 "Mixer patch",
-                "Render to .wav and .mp3",
+                "Export to .wav and .mp3",
             ]
         )
         rows.next_to(title, DOWN, buff=0.8)
@@ -323,7 +305,7 @@ class MyPractice(Slide):
         self.add(title, rows)
 
     def composition_title_slide(self):
-        title = Text("073_sync_conference", font_size=56, weight=BOLD)
+        title = slide_title("073_sync_conference", center=True)
         subtitle = Text("16 Bar Composition", font_size=36, color=MUTED)
         subtitle.next_to(title, DOWN, buff=0.35)
 
@@ -516,8 +498,6 @@ class MyPractice(Slide):
             Create(pitch_arrow),
             run_time=1.5,
         )
-        self.wait()
-        self.next_slide()
 
         start_value = Text(
             "0", font_size=18, color=START_COLOR, fill_opacity=1
@@ -795,7 +775,6 @@ class MyPractice(Slide):
         pattern = make_pattern(x_left + bar_w / 2)
 
         self.add(timeline, pattern)
-        self.wait()
         self.next_slide()
 
         copies = [

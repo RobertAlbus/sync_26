@@ -1,21 +1,7 @@
 from manim import *
 from manim_slides import Slide
 
-
-ACCENT = BLUE
-MUTED = GREY_A
-
-
-def bullet_rows(items, font_size=30):
-    rows = VGroup()
-    for item in items:
-        marker = Text("•", font_size=font_size, color=ACCENT)
-        label = Text(item, font_size=font_size)
-        row = VGroup(marker, label).arrange(RIGHT, buff=0.3)
-        marker.set_y(label.get_center()[1])
-        rows.add(row)
-    rows.arrange(DOWN, aligned_edge=LEFT, buff=0.35)
-    return rows
+from lib import ACCENT, MUTED, bullet_rows, slide_title
 
 
 class Intro(Slide):
@@ -26,6 +12,11 @@ class Intro(Slide):
 
         self.clear()
         self.bio_slide()
+        self.wait()
+        self.next_slide()
+
+        self.clear()
+        self.premise_slide()
         self.wait()
         self.next_slide()
 
@@ -59,18 +50,12 @@ class Intro(Slide):
         self.add(VGroup(name, role, practice, rule, aliases).move_to(ORIGIN))
 
     def title_slide(self):
-        title = Text(
-            "Writing Electronic Music\nLiterally from Scratch",
-            font_size=54,
-            weight=BOLD,
-            line_spacing=1.1,
-        )
-        title.to_edge(UP, buff=1.0)
+        title = slide_title("Writing Electronic Music\n Literally from Scratch")
 
         subtitle = Text(
             "Using the C++ programming language to build an audio engine,\n"
-            "instruments, and the song itself.",
-            font_size=28,
+            "instruments, and the compositional method from first principles.",
+            font_size=24,
             color=MUTED,
             line_spacing=1.0,
         )
@@ -84,16 +69,30 @@ class Intro(Slide):
 
         self.add(title, subtitle, rule, author)
 
-    def overview_slide(self):
-        title = Text("Overview", font_size=48, weight=BOLD)
-        title.to_edge(UP, buff=0.9)
+    def premise_slide(self):
+        title = slide_title("An unconventional approach\nto music production")
 
         rows = bullet_rows(
             [
-                "Demo a song",
-                "Demo actually writing music this way",
-                "technical deep dive: what is an audio engine?",
-                "live noise performance",
+                "Each song is a computer program",
+                "Code is the compositional medium",
+                "Custom audio engine, instruments, workflows",
+            ]
+        )
+        rows.next_to(title, DOWN, buff=0.8)
+        rows.move_to([0, rows.get_center()[1], 0])
+
+        self.add(title, rows)
+
+    def overview_slide(self):
+        title = slide_title("Presentation Overview")
+
+        rows = bullet_rows(
+            [
+                "Demo a completed song",
+                "Write a song",
+                "Technical deep dive: what is an audio engine?",
+                "Live noise performance",
             ]
         )
         rows.next_to(title, DOWN, buff=0.8)

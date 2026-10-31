@@ -5,7 +5,9 @@ import inspect
 import sys
 from pathlib import Path
 
-from manim import Scene
+from manim import Scene, Text
+
+Text.set_default(font="IBM Plex Mono")
 
 _HERE = Path(__file__).resolve().parent
 

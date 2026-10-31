@@ -2,6 +2,8 @@ import numpy as np
 from manim import *
 from manim_slides import Slide
 
+from lib import slide_title
+
 
 def make_speaker(scale=1.0):
     square = Rectangle(
@@ -120,7 +122,7 @@ def make_delay_icon(size=2.4):
 
 class EngineDeepDive(Slide):
     def construct(self):
-        self.add(Text("Engine Technical Deep Dive", font_size=44))
+        self.add(slide_title("Engine Technical Deep Dive", center=True))
         self.wait()
         self.next_slide()
 
@@ -137,8 +139,7 @@ class DigitalAudio(Slide):
         freq = n_samples / (wave_period_samples * t_end)
         amplitude = 1.0
 
-        title = Text("Digital Audio: From a Continuous Wave to Samples", font_size=30)
-        title.to_edge(UP, buff=0.25)
+        title = slide_title("Digital Audio")
 
         axes = Axes(
             x_range=[0, t_end, 0.5],
@@ -153,7 +154,7 @@ class DigitalAudio(Slide):
                 "decimal_number_config": {"num_decimal_places": 0},
             },
         )
-        axes.move_to([0, 1.4, 0])
+        axes.move_to([0, 0.8, 0])
 
         wave = axes.plot(
             lambda t: amplitude * np.sin(2 * np.pi * freq * t),
@@ -166,7 +167,7 @@ class DigitalAudio(Slide):
         y_labels = [
             n for n in axes.y_axis.numbers if abs(abs(n.get_value()) - 1.0) < 1e-6
         ]
-        self.next_slide()
+        # self.next_slide()
 
         box_width = max(label.width for label in y_labels) + 0.2
         box_height = max(label.height for label in y_labels) + 0.2
@@ -441,8 +442,7 @@ class DigitalAudio(Slide):
 
 class DspPrimitives(Slide):
     def construct(self):
-        title = Text("DSP Primitives", font_size=44, weight=BOLD)
-        title.to_edge(UP, buff=0.4)
+        title = slide_title("DSP Primitives")
 
         icons = VGroup(
             make_oscillator_icon(size=2.8),
