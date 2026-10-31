@@ -14,8 +14,8 @@ no animation
 
 ## dsp primitives => instruments
 - primitives: oscillators, filters, delays, envelopes
-- simple oscillator: osc.next() + plot
-- combining primitives into instruments: diagram of my subtractive synth
+create the icons in 03_icons.md as re-usable code that can be used for multiple instances across the slides. size may need to be configurable, but dimensions will always be square.
+the primitives slide shows the four icons at a relatively large size in a 2x2 configuration: osc, adsr, next row, filter, delay.
 
 ## sequencing
 - controls pitch, on/off, etc. over time

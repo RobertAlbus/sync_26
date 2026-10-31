@@ -8,6 +8,13 @@ START_COLOR = ManimColor("#2E7D32")
 DURATION_COLOR = ManimColor("#E65100")
 PITCH_COLOR = ManimColor("#00695C")
 ROLL_BACKGROUND = ManimColor("#A0A0A0")
+PIANO_ROLL_X_LEFT = -5.9
+PIANO_ROLL_X_RIGHT = 2.3
+PIANO_ROLL_Y_BOTTOM = -2.5
+PIANO_ROLL_Y_TOP = 2.3
+PIANO_ROLL_LOW_MIDI = 60
+PIANO_ROLL_HIGH_MIDI = 84
+PIANO_ROLL_BEATS = 4
 
 
 def bullet_rows(items, font_size=30):
@@ -96,6 +103,149 @@ def make_table(pos, n_rows=1, headers=("Start", "Duration", "Note")):
     return table, cells
 
 
+def build_piano_roll(
+    x_left,
+    x_right,
+    y_bottom,
+    y_top,
+    low_midi=PIANO_ROLL_LOW_MIDI,
+    high_midi=PIANO_ROLL_HIGH_MIDI,
+    n_beats=PIANO_ROLL_BEATS,
+):
+    width = x_right - x_left
+    height = y_top - y_bottom
+    n_keys = high_midi - low_midi + 1
+    row_h = height / n_keys
+    beat_w = width / n_beats
+
+    def px(beat):
+        return x_left + beat * beat_w
+
+    def py(midi):
+        return y_bottom + (midi - low_midi + 0.5) * row_h
+
+    base = Rectangle(
+        width=width,
+        height=height,
+        fill_color=ROLL_BACKGROUND,
+        fill_opacity=1,
+        stroke_width=0,
+    ).move_to([x_left + width / 2, (y_bottom + y_top) / 2, 0])
+
+    grid = VGroup()
+    labels = VGroup()
+
+    black_classes = {1, 3, 6, 8, 10}
+    key_width = 0.55
+
+    keyboard = VGroup()
+    keyboard.add(
+        Rectangle(
+            width=key_width,
+            height=height,
+            fill_color=GREY_A,
+            fill_opacity=1,
+            stroke_color=GREY_B,
+            stroke_width=2,
+        ).move_to([x_left - key_width / 2, (y_bottom + y_top) / 2, 0])
+    )
+    for i in range(n_keys + 1):
+        y = y_bottom + i * row_h
+        keyboard.add(
+            Line(
+                [x_left - key_width, y, 0],
+                [x_left, y, 0],
+                color=GREY_C,
+                stroke_width=1,
+            )
+        )
+    for midi in range(low_midi, high_midi + 1):
+        if (midi - low_midi) % 12 in black_classes:
+            black_width = key_width * 0.62
+            keyboard.add(
+                Rectangle(
+                    width=black_width,
+                    height=row_h * 0.9,
+                    fill_color=GREY_D,
+                    fill_opacity=1,
+                    stroke_color=GREY_C,
+                    stroke_width=1,
+                ).move_to(
+                    [x_left - key_width + black_width / 2, py(midi), 0]
+                )
+            )
+
+    for midi in range(low_midi, high_midi):
+        if (midi - low_midi) % 12 in black_classes:
+            stripe = Rectangle(
+                width=width,
+                height=row_h,
+                fill_color=GREY_B,
+                fill_opacity=1,
+                stroke_width=0,
+            )
+            stripe.move_to(
+                [
+                    x_left + width / 2,
+                    y_bottom + (midi - low_midi + 0.5) * row_h,
+                    0,
+                ]
+            )
+            grid.add(stripe)
+
+    for i in range(n_keys + 1):
+        y = y_bottom + i * row_h
+        grid.add(
+            Line([x_left, y, 0], [x_right, y, 0], color=GREY_D, stroke_width=1)
+        )
+
+    for i in range(n_beats * 4 + 1):
+        x = x_left + i * beat_w / 4
+        grid.add(
+            Line([x, y_bottom, 0], [x, y_top, 0], color=GREY_E, stroke_width=1)
+        )
+
+    for beat in range(n_beats + 1):
+        x = px(beat)
+        is_bar = beat % 4 == 0
+        grid.add(
+            Line(
+                [x, y_bottom, 0],
+                [x, y_top, 0],
+                color=BLACK if is_bar else GREY_D,
+                stroke_width=3 if is_bar else 2,
+            )
+        )
+
+    for beat in range(n_beats):
+        label = Text(str(beat), font_size=14, color=GREY_B)
+        label.move_to([px(beat), y_bottom - 0.2, 0])
+        labels.add(label)
+
+    for midi in (60, 72, 84):
+        label = Text(f"C{midi // 12 - 1}", font_size=16, color=MUTED)
+        label.move_to([x_left - key_width - 0.25, py(midi), 0])
+        labels.add(label)
+
+    def note_rect(start_beat, duration, midi, color):
+        x0 = px(start_beat)
+        x1 = px(start_beat + duration)
+        rect = Rectangle(
+            width=x1 - x0,
+            height=row_h * 0.8,
+            fill_color=color,
+            fill_opacity=1,
+            stroke_color=color,
+            stroke_width=2,
+        )
+        rect.move_to([(x0 + x1) / 2, py(midi), 0])
+        return rect
+
+    notes = [note_rect(beat, 0.5, 66, BLUE_E) for beat in range(n_beats)]
+
+    return base, keyboard, grid, labels, notes, px, py, row_h, beat_w
+
+
 class MyPractice(Slide):
     def construct(self):
         self.compositional_slide()
@@ -163,7 +313,7 @@ class MyPractice(Slide):
         rows = bullet_rows(
             [
                 "The live UI is a helpful tool, not the authority.",
-                "The authoritative representation of the song is the code",
+                "The authoritative representation of the song is the code.",
             ],
             font_size=26,
         )
@@ -457,76 +607,29 @@ class MyPractice(Slide):
         self.wait()
 
     def pattern_morph_slide(self):
-        roll_width = 6.4
-        roll_height = 2.2
-        center_x = 0.3
-        roll_left = center_x - roll_width / 2
-        n_beats = 4
-        beat_w = roll_width / n_beats
-        note_width = roll_width / 8
-        note_height = 0.18
-        note_y = 0.3
+        x_left = PIANO_ROLL_X_LEFT
+        x_right = PIANO_ROLL_X_RIGHT
+        y_bottom = PIANO_ROLL_Y_BOTTOM
+        y_top = PIANO_ROLL_Y_TOP
+        n_beats = PIANO_ROLL_BEATS
 
-        roll_bg = Rectangle(
-            width=roll_width,
-            height=roll_height,
-            fill_color=ROLL_BACKGROUND,
-            fill_opacity=1,
-            stroke_color=GREY_B,
-            stroke_width=2,
-        ).move_to([center_x, 0, 0])
+        base, keyboard, grid, labels, notes, *_ = build_piano_roll(
+            x_left, x_right, y_bottom, y_top, n_beats=n_beats
+        )
+        start_notes = VGroup(*notes)
+        details = VGroup(keyboard, grid, labels)
+        roll_center_x = (x_left + x_right) / 2
+        roll_center_y = (y_bottom + y_top) / 2
 
-        grid = VGroup()
-        for i in range(n_beats * 4 + 1):
-            x = roll_left + i * beat_w / 4
-            grid.add(
-                Line(
-                    [x, -roll_height / 2, 0],
-                    [x, roll_height / 2, 0],
-                    color=GREY_E,
-                    stroke_width=1,
-                )
-            )
-        for beat in range(n_beats + 1):
-            x = roll_left + beat * beat_w
-            is_bar = beat in (0, n_beats)
-            grid.add(
-                Line(
-                    [x, -roll_height / 2, 0],
-                    [x, roll_height / 2, 0],
-                    color=BLACK if is_bar else GREY_D,
-                    stroke_width=3 if is_bar else 2,
-                )
-            )
-        for y in (-1.1, -0.7, -0.3, 0.1, 0.5, 0.9):
-            grid.add(
-                Line(
-                    [roll_left, y, 0],
-                    [roll_left + roll_width, y, 0],
-                    color=GREY_D,
-                    stroke_width=1,
-                )
-            )
-
-        start_notes = VGroup()
-        for beat in range(n_beats):
-            note = Rectangle(
-                width=note_width,
-                height=note_height,
-                fill_color=BLUE_E,
-                fill_opacity=1,
-                stroke_color=BLUE_E,
-                stroke_width=2,
-            )
-            note.move_to(
-                [roll_left + beat * beat_w + note_width / 2, note_y, 0]
-            )
-            start_notes.add(note)
-
-        bar_w = 13.6 / 16
-        clip_width = bar_w * 0.9
+        timeline_x_left = -6.8
+        timeline_x_right = 6.8
+        timeline_bars = 16
+        timeline_bar_w = (timeline_x_right - timeline_x_left) / timeline_bars
+        clip_width = timeline_bar_w * 0.9
         clip_height = 0.98
-        clip_left = center_x - clip_width / 2
+        clip_center_x = timeline_x_left + timeline_bar_w / 2
+        clip_center_y = 0.0
+        clip_left = clip_center_x - clip_width / 2
         clip_note_width = clip_width / 8
 
         clip_bg = Rectangle(
@@ -536,7 +639,7 @@ class MyPractice(Slide):
             fill_opacity=1,
             stroke_color=BLUE_B,
             stroke_width=2,
-        ).move_to([center_x, 0, 0])
+        ).move_to([clip_center_x, clip_center_y, 0])
 
         target_notes = VGroup()
         for beat in range(n_beats):
@@ -548,20 +651,71 @@ class MyPractice(Slide):
                 stroke_width=0,
             )
             note.move_to(
-                [clip_left + beat * clip_width / 4 + clip_note_width / 2, 0, 0]
+                [
+                    clip_left + beat * clip_width / 4 + clip_note_width / 2,
+                    clip_center_y,
+                    0,
+                ]
             )
             target_notes.add(note)
 
-        self.add(roll_bg, grid, start_notes)
-        self.wait()
-        self.next_slide()
+        details_target = details.copy()
+        sx = clip_width / (x_right - x_left)
+        sy = clip_height / (y_top - y_bottom)
+        roll_center = [roll_center_x, roll_center_y, 0]
+        details_target.stretch(sx, 0, about_point=roll_center)
+        details_target.stretch(sy, 1, about_point=roll_center)
+        details_target.shift(
+            [clip_center_x - roll_center_x, clip_center_y - roll_center_y, 0]
+        )
+        details_target.set_opacity(0)
+
+        timeline_y = 0.0
+        timeline_h = 6.4
+        timeline_top = timeline_y + timeline_h / 2
+
+        timeline = VGroup()
+        timeline.add(
+            Rectangle(
+                width=timeline_x_right - timeline_x_left,
+                height=timeline_h,
+                fill_opacity=0,
+                stroke_color=GREY_B,
+                stroke_width=2,
+            ).move_to([0, timeline_y, 0])
+        )
+        for bar in range(timeline_bars + 1):
+            x = timeline_x_left + bar * timeline_bar_w
+            timeline.add(
+                Line(
+                    [x, timeline_top, 0],
+                    [x, timeline_top + 0.16, 0],
+                    color=GREY_B,
+                    stroke_width=2,
+                )
+            )
+        for bar in range(timeline_bars):
+            label = Text(str(bar), font_size=16, color=GREY_B)
+            label.move_to(
+                [
+                    timeline_x_left + bar * timeline_bar_w,
+                    timeline_top + 0.32,
+                    0,
+                ],
+                aligned_edge=LEFT,
+            )
+            timeline.add(label)
+
+        self.add(base, details, start_notes)
 
         self.play(
-            Transform(roll_bg, clip_bg),
+            Transform(base, clip_bg),
+            Transform(details, details_target),
             Transform(start_notes, target_notes),
-            FadeOut(grid),
             run_time=2.0,
         )
+        self.remove(details)
+        self.play(FadeIn(timeline), run_time=1.0)
         self.wait()
 
     def tiling_slide(self):

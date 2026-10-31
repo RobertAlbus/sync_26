@@ -8,7 +8,7 @@
 - mixer, routing
 - mixer patch
 - subtractive, fm, cymbal, fdn
-- render to .wav
+- render to .wav and .mp3
 
 ## composition expressed in code
 - the interactive UI is a helpful tool, not the authority

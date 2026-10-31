@@ -25,6 +25,99 @@ def make_speaker(scale=1.0):
     return VGroup(square, cone).scale(scale)
 
 
+ICON_STROKE = 4.0
+
+
+def icon_point(size, x, y):
+    return np.array([(x - 0.5) * size, (y - 0.5) * size, 0.0])
+
+
+def make_icon_frame(size=2.4):
+    return Square(
+        side_length=size,
+        stroke_color=WHITE,
+        stroke_width=ICON_STROKE,
+        fill_opacity=0.0,
+    )
+
+
+def make_oscillator_icon(size=2.4):
+    frame = make_icon_frame(size)
+    wave = ParametricFunction(
+        lambda t: icon_point(
+            size,
+            t,
+            0.50 + 0.35 * np.sin(2 * TAU * t),
+        ),
+        t_range=[0, 1],
+        color=WHITE,
+        stroke_width=ICON_STROKE,
+    )
+    return VGroup(frame, wave)
+
+
+def make_adsr_icon(size=2.4):
+    frame = make_icon_frame(size)
+    envelope = VMobject(color=WHITE, stroke_width=ICON_STROKE)
+    envelope.set_points_as_corners(
+        [
+            icon_point(size, 0.0, 0.12),
+            icon_point(size, 0.25, 0.88),
+            icon_point(size, 0.42, 0.55),
+            icon_point(size, 0.72, 0.55),
+            icon_point(size, 1.0, 0.12),
+        ]
+    )
+    return VGroup(frame, envelope)
+
+
+def make_filter_icon(size=2.4):
+    frame = make_icon_frame(size)
+    response = VMobject(color=WHITE, stroke_width=ICON_STROKE)
+    response.start_new_path(icon_point(size, 0.0, 0.70))
+    response.add_line_to(icon_point(size, 0.40, 0.70))
+    response.add_cubic_bezier_curve_to(
+        icon_point(size, 0.43, 0.70),
+        icon_point(size, 0.47, 0.78),
+        icon_point(size, 0.50, 0.78),
+    )
+    response.add_cubic_bezier_curve_to(
+        icon_point(size, 0.53, 0.78),
+        icon_point(size, 0.57, 0.765),
+        icon_point(size, 0.60, 0.72),
+    )
+    response.add_line_to(icon_point(size, 1.0, 0.12))
+    return VGroup(frame, response)
+
+
+def make_delay_icon(size=2.4):
+    frame = make_icon_frame(size)
+
+    def pulse(x, start, width):
+        if start <= x <= start + width:
+            return np.sin(TAU * (x - start) / width)
+        return 0.0
+
+    def signal(baseline, start, opacity):
+        path = ParametricFunction(
+            lambda t: icon_point(
+                size,
+                t,
+                baseline + 0.425 * pulse(t, start, 0.16),
+            ),
+            t_range=[0, 1],
+            color=WHITE,
+            stroke_width=ICON_STROKE,
+            use_smoothing=False,
+        )
+        path.set_stroke(opacity=opacity)
+        return path
+
+    original = signal(0.55, 0.20, 1.0)
+    delayed = signal(0.45, 0.64, 0.5)
+    return VGroup(frame, original, delayed)
+
+
 class EngineDeepDive(Slide):
     def construct(self):
         self.add(Text("Engine Technical Deep Dive", font_size=44))
@@ -36,6 +129,7 @@ class DigitalAudio(Slide):
     def construct(self):
         self.skip_reversing = True
         self.wait_time_between_slides = 0.1
+        self.wait_between_looping_slides = False
 
         t_end = 2.0
         n_samples = 16
@@ -188,7 +282,7 @@ class DigitalAudio(Slide):
         self.add(array_label)
 
         self.play(Transform(travelling_group, landed_group), run_time=1.0)
-        self.next_slide()
+        self.next_slide(auto_next=True)
 
         speaker = make_speaker()
         speaker.move_to([4.8, -3.2, 0])
@@ -206,8 +300,9 @@ class DigitalAudio(Slide):
         self.play(FadeOut(travelling_group, scale=0.3), run_time=0.4)
 
         cone_tip = speaker[1].get_right() + RIGHT * 0.1
-        for _ in range(2):
-            waves = VGroup(
+
+        def make_speaker_waves():
+            return VGroup(
                 *[
                     Arc(
                         radius=radius,
@@ -219,6 +314,11 @@ class DigitalAudio(Slide):
                     for radius in (0.25, 0.45, 0.65)
                 ]
             )
+
+        self.next_slide(loop=True)
+
+        for _ in range(2):
+            waves = make_speaker_waves()
             self.play(
                 LaggedStart(*[Create(wave) for wave in waves], lag_ratio=0.25),
                 run_time=0.8,
@@ -226,6 +326,8 @@ class DigitalAudio(Slide):
             self.play(FadeOut(waves), run_time=0.2)
 
         self.next_slide()
+        self.wait(0.5)
+        self.next_slide(auto_next=True)
 
         speaker_target = speaker[0].get_center()
 
@@ -270,44 +372,24 @@ class DigitalAudio(Slide):
                     number.scale((cell_w - 0.12) / number.width)
             return numbers
 
+        self.remove(dots, travelling_group)
+
         graph_dots = make_graph_dots(0)
+        buffer_items = make_buffer_numbers(9)
         self.play(
             LaggedStart(
                 *[FadeIn(dot, scale=0.4) for dot in graph_dots],
                 lag_ratio=0.03,
             ),
+            FadeIn(buffer_items, scale=0.5),
             run_time=0.6,
         )
 
-        next_dots = make_graph_dots(1)
-        current_numbers = make_buffer_numbers(0)
-        self.play(
-            AnimationGroup(
-                LaggedStart(
-                    *[
-                        Transform(dot, number)
-                        for dot, number in zip(graph_dots, current_numbers)
-                    ],
-                    lag_ratio=0.02,
-                    run_time=1.0,
-                ),
-                Succession(
-                    Wait(0.2),
-                    LaggedStart(
-                        *[FadeIn(dot, scale=0.4) for dot in next_dots],
-                        lag_ratio=0.02,
-                        run_time=0.8,
-                    ),
-                ),
-            )
-        )
-        buffer_items = graph_dots
-        graph_dots = next_dots
+        self.next_slide(loop=True)
 
-        speaker_batch = None
         for cycle in range(10):
-            next_dots = make_graph_dots(cycle + 2)
-            current_numbers = make_buffer_numbers(cycle + 1)
+            next_dots = make_graph_dots((cycle + 1) % 10)
+            current_numbers = make_buffer_numbers(cycle)
             graph_to_buffer = LaggedStart(
                 *[
                     Transform(dot, number)
@@ -329,40 +411,46 @@ class DigitalAudio(Slide):
                 lag_ratio=0.02,
                 run_time=0.8,
             )
-            animations = [
-                graph_to_buffer,
-                Succession(
-                    Wait(0.2),
-                    AnimationGroup(buffer_to_speaker, graph_redraw),
-                ),
-            ]
-            if speaker_batch is not None:
-                animations.append(FadeOut(speaker_batch, run_time=0.2))
-            self.play(AnimationGroup(*animations))
-            if speaker_batch is not None:
-                self.remove(speaker_batch)
-            speaker_batch = buffer_items
+            waves = make_speaker_waves()
+            waves_create = LaggedStart(
+                *[Create(wave) for wave in waves],
+                lag_ratio=0.25,
+                run_time=0.8,
+            )
+            self.play(
+                AnimationGroup(
+                    graph_to_buffer,
+                    Succession(
+                        Wait(0.2),
+                        AnimationGroup(
+                            buffer_to_speaker,
+                            graph_redraw,
+                            waves_create,
+                        ),
+                    ),
+                )
+            )
+            self.play(
+                FadeOut(buffer_items, run_time=0.2),
+                FadeOut(waves, run_time=0.2),
+            )
+            self.remove(buffer_items, waves)
             buffer_items = graph_dots
             graph_dots = next_dots
 
-        if speaker_batch is not None:
-            self.play(FadeOut(speaker_batch), run_time=0.2)
-            self.remove(speaker_batch)
 
-        self.play(
-            LaggedStart(
-                *[
-                    number.animate.move_to(speaker_target)
-                    for number in buffer_items
-                ],
-                lag_ratio=0.02,
-                run_time=0.8,
-            )
-        )
-        self.play(
-            FadeOut(buffer_items),
-            FadeOut(graph_dots),
-            run_time=0.3,
-        )
-        self.remove(dots, travelling_group, buffer_items, graph_dots, next_dots)
-        self.wait(0.3)
+class DspPrimitives(Slide):
+    def construct(self):
+        title = Text("DSP Primitives", font_size=44, weight=BOLD)
+        title.to_edge(UP, buff=0.4)
+
+        icons = VGroup(
+            make_oscillator_icon(size=2.8),
+            make_adsr_icon(size=2.8),
+            make_filter_icon(size=2.8),
+            make_delay_icon(size=2.8),
+        ).arrange_in_grid(rows=2, cols=2, buff=(1.4, 0.6))
+        icons.next_to(title, DOWN, buff=0.5)
+
+        self.add(title, icons)
+        self.wait()
