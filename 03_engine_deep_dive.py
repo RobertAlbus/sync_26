@@ -34,7 +34,7 @@ def icon_point(size, x, y):
     return np.array([(x - 0.5) * size, (y - 0.5) * size, 0.0])
 
 
-def make_icon_frame(size=2.4):
+def make_icon_frame(size=1):
     return Square(
         side_length=size,
         stroke_color=WHITE,
@@ -43,7 +43,7 @@ def make_icon_frame(size=2.4):
     )
 
 
-def make_oscillator_icon(size=2.4):
+def make_oscillator_icon(size=1):
     frame = make_icon_frame(size)
     wave = ParametricFunction(
         lambda t: icon_point(
@@ -58,7 +58,7 @@ def make_oscillator_icon(size=2.4):
     return VGroup(frame, wave)
 
 
-def make_adsr_icon(size=2.4):
+def make_adsr_icon(size=1):
     frame = make_icon_frame(size)
     envelope = VMobject(color=WHITE, stroke_width=ICON_STROKE)
     envelope.set_points_as_corners(
@@ -73,7 +73,7 @@ def make_adsr_icon(size=2.4):
     return VGroup(frame, envelope)
 
 
-def make_filter_icon(size=2.4):
+def make_filter_icon(size=1):
     frame = make_icon_frame(size)
     response = VMobject(color=WHITE, stroke_width=ICON_STROKE)
     response.start_new_path(icon_point(size, 0.0, 0.70))
@@ -92,7 +92,7 @@ def make_filter_icon(size=2.4):
     return VGroup(frame, response)
 
 
-def make_delay_icon(size=2.4):
+def make_delay_icon(size=1):
     frame = make_icon_frame(size)
 
     def pulse(x, start, width):
@@ -445,11 +445,23 @@ class DspPrimitives(Slide):
         title = slide_title("DSP Primitives")
 
         icons = VGroup(
-            make_oscillator_icon(size=2.8),
-            make_adsr_icon(size=2.8),
-            make_filter_icon(size=2.8),
-            make_delay_icon(size=2.8),
-        ).arrange_in_grid(rows=2, cols=2, buff=(1.4, 0.6))
+            VGroup(
+                make_oscillator_icon(size=2.4),
+                Text("Oscillator", font_size=28),
+            ).arrange(DOWN, buff=0.3),
+            VGroup(
+                make_adsr_icon(size=2.4),
+                Text("Envelope", font_size=28),
+            ).arrange(DOWN, buff=0.3),
+            VGroup(
+                make_filter_icon(size=2.4),
+                Text("Filter", font_size=28),
+            ).arrange(DOWN, buff=0.3),
+            VGroup(
+                make_delay_icon(size=2.4),
+                Text("Delay", font_size=28),
+            ).arrange(DOWN, buff=0.3),
+        ).arrange(RIGHT, buff=0.8, aligned_edge=UP)
         icons.next_to(title, DOWN, buff=0.5)
 
         self.add(title, icons)
