@@ -1,20 +1,7 @@
-# 02: My Practice
+# 04: Write a Song
 
-## compositional, not live
+## 073_sync_conference 16 bar composition
 
-
-## demo: 067_dj_tool
-- timeline
-- mixer, routing
-- mixer patch
-- subtractive, fm, cymbal, fdn
-- render to .wav and .mp3
-
-## composition expressed in code
-- the interactive UI is a helpful tool, not the authority
-- the authoritative representation of the song must remain computational
-
-## 073_sync_conference 16 bar composition 
 - slide 1: title, no animation
 - slide 2: notes on a piano roll
     - create a 2 octave piano roll over 2 bars with 2 different notes/lengths but they do not overlap in time
@@ -26,7 +13,9 @@
     - wait for me to progress
     - animate the numerical values moving into the table
     - wait for me to progress
-    - fade in a second identical table that is empty and in the same animation take the data from the second note and move it into the second table 
+    - fade in a second identical table that is empty and in the same animation take the data from the second note and move it into the second table
+
+## Pattern construction
 
 - 4/4 kick and pattern algebra
     - construct 1 bar, tile 16 bars, trim_between

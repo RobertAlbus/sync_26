@@ -7,16 +7,10 @@
         * I am fully self-taught
     * quick overview of presentation
     * goals for this talk
-* 02: my practice
-    * [slide] 
+* 02: [slides] completed song
     * [slide] compositional, not live. compare production vs. live performance
     * [demo]: 067_dj_tool
     * [slide] the composition is expressed in code. the live ui is a helpful tool but not the authority.
-    * [demo+slides] composition 16 bars (needs to be constructed)
-        * 4/4 kick and algebra constructed (1 bar, tile 16 bars, trim_between)
-        * chords (construct 2 bars A and B version, tile)
-        * automation clip for chords (rise from bar 0 to 8, then loop for 8-16)
-        * bassline (light weight stochastic search example, tile, trim)
 * 03: [slides] engine technical deep dive (succinct)
     * engine
         * digital audio primer
@@ -28,8 +22,17 @@
     * sequencing
         * controls pitch, on/off, etc. over time
     * unifying diagram animation
-* 04: [slides] why I like to work this way
+* 04: [slides] write a song
+    * [slide] 073_sync_conference 16 bar composition
+    * [slide] piano roll: start, duration, pitch
+    * 4/4 kick and algebra constructed (1 bar, tile 16 bars, trim_between)
+    * chords (construct 2 bars A and B version, tile)
+    * automation clip for chords (rise from bar 0 to 8, then loop for 8-16)
+    * bassline (light weight stochastic search example, tile, trim)
 * 05: live noise performance system (optional time permitting)
     * [slide] fdn diagram
     * [demo]
 * 06: [slide] conclusion
+
+## Unscheduled
+* [slides] why I like to work this way

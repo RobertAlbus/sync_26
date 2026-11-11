@@ -122,7 +122,7 @@ def make_delay_icon(size=1):
 
 class EngineDeepDive(Slide):
     def construct(self):
-        self.add(slide_title("Engine Technical Deep Dive", center=True))
+        self.add(slide_title("Audio Engine: Technical Deep Dive", center=True))
         self.wait()
         self.next_slide()
 
