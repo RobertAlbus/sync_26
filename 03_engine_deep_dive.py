@@ -120,6 +120,51 @@ def make_delay_icon(size=1):
     return VGroup(frame, original, delayed)
 
 
+def make_sum_icon(size=0.5):
+    circle = Circle(
+        radius=size / 2,
+        stroke_color=WHITE,
+        stroke_width=ICON_STROKE,
+        fill_opacity=0.0,
+    )
+    horizontal = Line(
+        [-size / 2, 0, 0],
+        [size / 2, 0, 0],
+        color=WHITE,
+        stroke_width=ICON_STROKE,
+    )
+    vertical = Line(
+        [0, -size / 2, 0],
+        [0, size / 2, 0],
+        color=WHITE,
+        stroke_width=ICON_STROKE,
+    )
+    return VGroup(circle, horizontal, vertical)
+
+
+def make_multiply_icon(size=0.5):
+    circle = Circle(
+        radius=size / 2,
+        stroke_color=WHITE,
+        stroke_width=ICON_STROKE,
+        fill_opacity=0.0,
+    )
+    offset = size / (2 * np.sqrt(2))
+    diagonal_a = Line(
+        [-offset, -offset, 0],
+        [offset, offset, 0],
+        color=WHITE,
+        stroke_width=ICON_STROKE,
+    )
+    diagonal_b = Line(
+        [-offset, offset, 0],
+        [offset, -offset, 0],
+        color=WHITE,
+        stroke_width=ICON_STROKE,
+    )
+    return VGroup(circle, diagonal_a, diagonal_b)
+
+
 class EngineDeepDive(Slide):
     def construct(self):
         self.add(slide_title("Audio Engine: Technical Deep Dive", center=True))
@@ -464,5 +509,22 @@ class DspPrimitives(Slide):
         ).arrange(RIGHT, buff=0.8, aligned_edge=UP)
         icons.next_to(title, DOWN, buff=0.5)
 
-        self.add(title, icons)
+        sum_block = VGroup(
+            make_sum_icon(),
+            Text("Sum", font_size=28),
+        ).arrange(DOWN, buff=0.3)
+        multiply_block = VGroup(
+            make_multiply_icon(),
+            Text("Multiply", font_size=28),
+        ).arrange(DOWN, buff=0.3)
+
+        row_top = icons.get_bottom()[1] - 0.8
+        sum_block.move_to(
+            [icons[1].get_center()[0], row_top - sum_block.height / 2, 0]
+        )
+        multiply_block.move_to(
+            [icons[2].get_center()[0], row_top - multiply_block.height / 2, 0]
+        )
+
+        self.add(title, icons, sum_block, multiply_block)
         self.wait()

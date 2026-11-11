@@ -90,7 +90,7 @@ class Intro(Slide):
         rows = bullet_rows(
             [
                 "Demo a completed song",
-                "Technical deep dive: what is an audio engine?",
+                "Audio Engine: Technical Deep Dive",
                 "Write a song",
             ]
         )
